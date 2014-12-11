@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "Compiling..."
+nasm -f bin -o myboot.img boot.asm
+echo "Running..."
+qemu-system-i386 -fda myboot.img
