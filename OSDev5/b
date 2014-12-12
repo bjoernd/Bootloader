@@ -1,0 +1,27 @@
+#!/bin/sh
+
+msg ()
+{
+	echo "\033[34m"$1"\033[0m"
+}
+
+msg "Compiling..."
+nasm -f bin -o stage1.img stage1.asm 
+nasm -f bin -o stage2.img stage2.asm
+
+msg "Writing boot sector..."
+dd if=stage1.img of=floppy.disk bs=512 count=1
+msg "Writing disk image..."
+dd if=/dev/zero of=floppy.disk bs=512 count=2879 seek=1
+
+msg "Installing stage 2..."
+sudo mount -o loop floppy.disk mnt
+sudo cp stage2.img mnt/
+sudo umount mnt
+
+msg "Running QEMU..."
+qemu-system-i386 -fda floppy.disk
+
+if [ -n "$1" ]; then
+  echo $1
+fi
